@@ -1,0 +1,4 @@
+[submodule "riscv-gnu-toolchain"]
+	path = riscv-gnu-toolchain
+	url = https://github.com/riscv/riscv-gnu-toolchain.git
+	branch = rvv-0.8.x
