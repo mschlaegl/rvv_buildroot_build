@@ -48,6 +48,27 @@ build_toolchain()
 }
 
 
+build_buildroot()
+{
+	echo " ++ Update config"
+	sed buildroot.config \
+		-e s#\@TOOLCHAIN_INSTALL_PATH\@#$TOOLCHAIN_INSTALL_PATH#g	\
+	> buildroot/.config
+	echo " -- Update config"
+
+	echo " ++ Build"
+	pushd buildroot > /dev/null
+	if ! make ; then
+		echo "ERROR! -> Abort"
+		popd > /dev/null
+		return 1
+	fi
+	echo " -- Build"
+
+	popd > /dev/null
+	return 0
+}
+
 
 echo " + Build Toolchain"
 if ! build_toolchain ; then
@@ -55,6 +76,12 @@ if ! build_toolchain ; then
 fi
 echo " - Build Toolchain"
 
+
+echo " + Build Buildroot"
+if ! build_buildroot ; then
+	exit 1
+fi
+echo " - Build Buildroot"
 
 
 echo
