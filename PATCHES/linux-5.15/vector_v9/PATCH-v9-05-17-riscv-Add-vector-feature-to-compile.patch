@@ -1,0 +1,119 @@
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Return-Path: <linux-kernel-owner@kernel.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
+	aws-us-west-2-korg-lkml-1.web.codeaurora.org
+Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2F88EC433EF
+	for <linux-kernel@archiver.kernel.org>; Tue,  9 Nov 2021 09:50:04 +0000 (UTC)
+Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
+	by mail.kernel.org (Postfix) with ESMTP id 1C012611CC
+	for <linux-kernel@archiver.kernel.org>; Tue,  9 Nov 2021 09:50:04 +0000 (UTC)
+Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
+        id S245001AbhKIJws (ORCPT <rfc822;linux-kernel@archiver.kernel.org>);
+        Tue, 9 Nov 2021 04:52:48 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49246 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S244239AbhKIJvb (ORCPT
+        <rfc822;linux-kernel@vger.kernel.org>);
+        Tue, 9 Nov 2021 04:51:31 -0500
+Received: from mail-pg1-x533.google.com (mail-pg1-x533.google.com [IPv6:2607:f8b0:4864:20::533])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 54026C06120B
+        for <linux-kernel@vger.kernel.org>; Tue,  9 Nov 2021 01:48:40 -0800 (PST)
+Received: by mail-pg1-x533.google.com with SMTP id g184so18000366pgc.6
+        for <linux-kernel@vger.kernel.org>; Tue, 09 Nov 2021 01:48:40 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=sifive.com; s=google;
+        h=from:to:subject:date:message-id:in-reply-to:references:mime-version
+         :content-transfer-encoding;
+        bh=earQXVM9ZpHBsIuYCgsSO014fLReRw8iXSg4gGRjLpA=;
+        b=eFQ2LvIIOUcoe8Vnr8ZReO0zVkG6yBNbCkwqFSzinze8kstWqfY3ioU9vyHDUDNntq
+         U9wXnP8dttrXtDOsrR04DzHK8J2Mur4UdSmi0f9Yn9Ws4HHi2RosvGd06d8KSzRK5NGI
+         UQB7YL7E3rV0FnwJ8J6l/6tUJsIl76hR6HMw+Je3OiHlOXrerdNa4/AfwsI0fDDmMMj5
+         XhQDr2iMG9CkD+n3Lvhwb+RDTDLPAyWS1wO2kq0nLzDQm2yXENE+qZGSTVs26GB1UvvU
+         jv4cZPipi6gdOKHh1VOEegnNsi/801eWV0mfHu1PgIC48mGcHIJyrM3yzvyjAQvgA1hP
+         TctQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=earQXVM9ZpHBsIuYCgsSO014fLReRw8iXSg4gGRjLpA=;
+        b=lyrDM02hZPNUQCJRr1i3/wVTkrkBV5nThhqLOxxmIgwwBsw4kKOdj4MfoaXHGRrloJ
+         LLDfzmNcJ4WFBoIYXE+ugs+xjoN2jqw2k/1J0Bz6eUlm0n/Yji32+6iDQ7y2aPVr4IvU
+         meHjq089yz0L0lhzJYiROm1gSRvNhJ+4g69T0ydMMciMPrtxO8z96PrYpLFQFgO0LEGT
+         8C1kJwgz9cVi8CXTzAiXTsU8lfdxToGrBTDeMCkLKIGmLb4ReyfWuJ7CVZfsMRP1RLYj
+         jhJclzAxAbpacRcy90jA2NOJBzAxD6LiNE5nsQT55mi16bXG6kXouPIl7EzecashN3sb
+         xpvQ==
+X-Gm-Message-State: AOAM5332VPsn/rl7k2a7llJSm1xNveH+MiV/4AxABR0L+P4cXYOgg2DQ
+        sSfrbhqCoqkWGMoihZGB5FOTDg==
+X-Google-Smtp-Source: ABdhPJxkLQJhp1q9mtVPkNo9QaKm6TAP/UN94ydOvWwI4RknDQjCZkuDN0aqowjnbprQ93hf3yNPlg==
+X-Received: by 2002:a63:7308:: with SMTP id o8mr4878770pgc.77.1636451319866;
+        Tue, 09 Nov 2021 01:48:39 -0800 (PST)
+Received: from hsinchu16.internal.sifive.com (59-124-168-89.hinet-ip.hinet.net. [59.124.168.89])
+        by smtp.gmail.com with ESMTPSA id cv1sm1940511pjb.48.2021.11.09.01.48.38
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 09 Nov 2021 01:48:39 -0800 (PST)
+From:   Greentime Hu <greentime.hu@sifive.com>
+To:     palmer@dabbelt.com, paul.walmsley@sifive.com,
+        linux-riscv@lists.infradead.org, linux-kernel@vger.kernel.org,
+        aou@eecs.berkeley.edu
+Subject: [PATCH v9 05/17] riscv: Add vector feature to compile
+Date:   Tue,  9 Nov 2021 17:48:17 +0800
+Message-Id: <2684ea9e25a63c7a88faf46680a26e560027e444.1636362169.git.greentime.hu@sifive.com>
+X-Mailer: git-send-email 2.31.1
+In-Reply-To: <cover.1636362169.git.greentime.hu@sifive.com>
+References: <cover.1636362169.git.greentime.hu@sifive.com>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+Precedence: bulk
+List-ID: <linux-kernel.vger.kernel.org>
+X-Mailing-List: linux-kernel@vger.kernel.org
+
+From: Guo Ren <guoren@linux.alibaba.com>
+
+This patch adds a new config option which could enable assembler's
+vector feature.
+
+Signed-off-by: Greentime Hu <greentime.hu@sifive.com>
+Signed-off-by: Guo Ren <guoren@linux.alibaba.com>
+Reviewed-by: Greentime Hu <greentime.hu@sifive.com>
+---
+ arch/riscv/Kconfig  | 9 +++++++++
+ arch/riscv/Makefile | 1 +
+ 2 files changed, 10 insertions(+)
+
+diff --git a/arch/riscv/Kconfig b/arch/riscv/Kconfig
+index f076cee11af6..0311579920b9 100644
+--- a/arch/riscv/Kconfig
++++ b/arch/riscv/Kconfig
+@@ -389,6 +389,15 @@ config FPU
+ 
+ 	  If you don't know what to do here, say Y.
+ 
++config VECTOR
++	bool "VECTOR support"
++	default n
++	help
++	  Say N here if you want to disable all vector related procedure
++	  in the kernel.
++
++	  If you don't know what to do here, say Y.
++
+ endmenu
+ 
+ menu "Kernel features"
+diff --git a/arch/riscv/Makefile b/arch/riscv/Makefile
+index 37de70df4fae..f109214a2d7f 100644
+--- a/arch/riscv/Makefile
++++ b/arch/riscv/Makefile
+@@ -57,6 +57,7 @@ riscv-march-aflags-$(CONFIG_ARCH_RV32I)		:= rv32ima
+ riscv-march-aflags-$(CONFIG_ARCH_RV64I)		:= rv64ima
+ riscv-march-aflags-$(CONFIG_FPU)		:= $(riscv-march-aflags-y)fd
+ riscv-march-aflags-$(CONFIG_RISCV_ISA_C)	:= $(riscv-march-aflags-y)c
++riscv-march-aflags-$(CONFIG_VECTOR)		:= $(riscv-march-aflags-y)v
+ 
+ KBUILD_CFLAGS += -march=$(riscv-march-cflags-y)
+ KBUILD_AFLAGS += -march=$(riscv-march-aflags-y)
+-- 
+2.31.1
+
+
