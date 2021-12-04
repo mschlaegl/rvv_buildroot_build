@@ -1,0 +1,120 @@
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Return-Path: <linux-kernel-owner@kernel.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
+	aws-us-west-2-korg-lkml-1.web.codeaurora.org
+Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6CCEEC433EF
+	for <linux-kernel@archiver.kernel.org>; Tue,  9 Nov 2021 09:48:55 +0000 (UTC)
+Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
+	by mail.kernel.org (Postfix) with ESMTP id 48C70611F0
+	for <linux-kernel@archiver.kernel.org>; Tue,  9 Nov 2021 09:48:55 +0000 (UTC)
+Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
+        id S244354AbhKIJvh (ORCPT <rfc822;linux-kernel@archiver.kernel.org>);
+        Tue, 9 Nov 2021 04:51:37 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49194 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S244148AbhKIJvV (ORCPT
+        <rfc822;linux-kernel@vger.kernel.org>);
+        Tue, 9 Nov 2021 04:51:21 -0500
+Received: from mail-pl1-x62e.google.com (mail-pl1-x62e.google.com [IPv6:2607:f8b0:4864:20::62e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0AFBBC061766
+        for <linux-kernel@vger.kernel.org>; Tue,  9 Nov 2021 01:48:36 -0800 (PST)
+Received: by mail-pl1-x62e.google.com with SMTP id n8so19935417plf.4
+        for <linux-kernel@vger.kernel.org>; Tue, 09 Nov 2021 01:48:36 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=sifive.com; s=google;
+        h=from:to:subject:date:message-id:in-reply-to:references:mime-version
+         :content-transfer-encoding;
+        bh=SzySQXHTaCH/jeJ8V7t+kf/QD6+VmDcSCT1AxKS8udk=;
+        b=JFuz72h/+N7c9t70d7T3be4Wf2/WOwpEDM87a3jx5Y8UkP9s4PS74W0/N9ecKeA9wn
+         wyv+tpboLULvJnx84ld7EiAVabh11TKwqf8dTejkIPTGjZqMwl5KhiU17dtWrsauM5vw
+         qwBWxCHa9bociIUzBCCdBWs1eqxGJx0i6KCeMpdi2rlB+h3EuC+GiC6gSMl59TxGb0NI
+         t52sgrBNAeiofAV85guN03HAL1Mnc4ioItC7sWJitkyiIPShvQ1XYEbhM3Z6i37qUulH
+         bWpTjVE4tiEyuvOIwWqjGlbuFVQPFoSHJmaJtfRYdEOcH0UMlhRjhDwpr9Ms8p2gVLZj
+         aZ3Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=SzySQXHTaCH/jeJ8V7t+kf/QD6+VmDcSCT1AxKS8udk=;
+        b=y1di4TcxHq7ETIaamNrO1i9TcFfAEqi3d5/95c3CTPqeN/gWc/VhJ7OiNKGXep/glX
+         mSXK+oNWaP7rlSIficLAxBWEJ7mcs239wvaHIXS7jYfojKJ2/H4lOW3PMnFPhWI/jAnO
+         P86DMqq1vGBXCNqkJ1SbpDr5y9qgWSUW/m69Q0zX+9XSxLwsmjDxbx6Ko1TG0iqbNVsa
+         cXmLn0qdp+QNWAOk2dXkqGOnv+E0+jdTt1FW4COXwvcSjq5McrllXnMzlnuiTTZTe80e
+         VuIoAoRHdy7FVs6cJv6Gu+EryBAB2xGJBuPbn2LonvQM6My/iRgCLFT4J8Jh5npAr48I
+         /6XA==
+X-Gm-Message-State: AOAM531zv3s37bVoRFOh7v+SnnPkpoeGWbm0iIjy+DUdpCgRVQT8QjE0
+        4BO9yvMkPBSey1cCvWYk1MV5Xg==
+X-Google-Smtp-Source: ABdhPJygDxGYUIR7vhtU/P5aTvMHEW0mnI1Gtq1FZCTF/RNDB3IDrD70htt7KuWh5VeCLXjvqPK2fQ==
+X-Received: by 2002:a17:90b:1bc4:: with SMTP id oa4mr5765834pjb.179.1636451315544;
+        Tue, 09 Nov 2021 01:48:35 -0800 (PST)
+Received: from hsinchu16.internal.sifive.com (59-124-168-89.hinet-ip.hinet.net. [59.124.168.89])
+        by smtp.gmail.com with ESMTPSA id cv1sm1940511pjb.48.2021.11.09.01.48.34
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 09 Nov 2021 01:48:35 -0800 (PST)
+From:   Greentime Hu <greentime.hu@sifive.com>
+To:     palmer@dabbelt.com, paul.walmsley@sifive.com,
+        linux-riscv@lists.infradead.org, linux-kernel@vger.kernel.org,
+        aou@eecs.berkeley.edu
+Subject: [PATCH v9 02/17] riscv: Rename __switch_to_aux -> fpu
+Date:   Tue,  9 Nov 2021 17:48:14 +0800
+Message-Id: <8e02819b9f8220f64ca43c330192c20594903ba9.1636362169.git.greentime.hu@sifive.com>
+X-Mailer: git-send-email 2.31.1
+In-Reply-To: <cover.1636362169.git.greentime.hu@sifive.com>
+References: <cover.1636362169.git.greentime.hu@sifive.com>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+Precedence: bulk
+List-ID: <linux-kernel.vger.kernel.org>
+X-Mailing-List: linux-kernel@vger.kernel.org
+
+From: Guo Ren <ren_guo@c-sky.com>
+
+The name of __switch_to_aux is not clear and rename it with the
+determine function: __switch_to_fpu. Next we could add other regs'
+switch.
+
+Signed-off-by: Guo Ren <ren_guo@c-sky.com>
+Signed-off-by: Guo Ren <guoren@linux.alibaba.com>
+Reviewed-by: Anup Patel <anup@brainfault.org>
+Reviewed-by: Greentime Hu <greentime.hu@sifive.com>
+Signed-off-by: Greentime Hu <greentime.hu@sifive.com>
+---
+ arch/riscv/include/asm/switch_to.h | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/arch/riscv/include/asm/switch_to.h b/arch/riscv/include/asm/switch_to.h
+index 0a3f4f95c555..ec83770b3d98 100644
+--- a/arch/riscv/include/asm/switch_to.h
++++ b/arch/riscv/include/asm/switch_to.h
+@@ -45,7 +45,7 @@ static inline void fstate_restore(struct task_struct *task,
+ 	}
+ }
+ 
+-static inline void __switch_to_aux(struct task_struct *prev,
++static inline void __switch_to_fpu(struct task_struct *prev,
+ 				   struct task_struct *next)
+ {
+ 	struct pt_regs *regs;
+@@ -65,7 +65,7 @@ static __always_inline bool has_fpu(void)
+ static __always_inline bool has_fpu(void) { return false; }
+ #define fstate_save(task, regs) do { } while (0)
+ #define fstate_restore(task, regs) do { } while (0)
+-#define __switch_to_aux(__prev, __next) do { } while (0)
++#define __switch_to_fpu(__prev, __next) do { } while (0)
+ #endif
+ 
+ extern struct task_struct *__switch_to(struct task_struct *,
+@@ -76,7 +76,7 @@ do {							\
+ 	struct task_struct *__prev = (prev);		\
+ 	struct task_struct *__next = (next);		\
+ 	if (has_fpu())					\
+-		__switch_to_aux(__prev, __next);	\
++		__switch_to_fpu(__prev, __next);	\
+ 	((last) = __switch_to(__prev, __next));		\
+ } while (0)
+ 
+-- 
+2.31.1
+
+

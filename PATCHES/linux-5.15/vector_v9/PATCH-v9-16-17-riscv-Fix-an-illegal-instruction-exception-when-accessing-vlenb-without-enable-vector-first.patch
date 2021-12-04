@@ -1,0 +1,138 @@
+From mboxrd@z Thu Jan  1 00:00:00 1970
+Return-Path: <linux-kernel-owner@kernel.org>
+X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
+	aws-us-west-2-korg-lkml-1.web.codeaurora.org
+Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0203DC433F5
+	for <linux-kernel@archiver.kernel.org>; Tue,  9 Nov 2021 09:50:14 +0000 (UTC)
+Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
+	by mail.kernel.org (Postfix) with ESMTP id DABD26128B
+	for <linux-kernel@archiver.kernel.org>; Tue,  9 Nov 2021 09:50:13 +0000 (UTC)
+Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
+        id S245014AbhKIJw4 (ORCPT <rfc822;linux-kernel@archiver.kernel.org>);
+        Tue, 9 Nov 2021 04:52:56 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49314 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S244225AbhKIJvm (ORCPT
+        <rfc822;linux-kernel@vger.kernel.org>);
+        Tue, 9 Nov 2021 04:51:42 -0500
+Received: from mail-pl1-x62a.google.com (mail-pl1-x62a.google.com [IPv6:2607:f8b0:4864:20::62a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 92359C0613B9
+        for <linux-kernel@vger.kernel.org>; Tue,  9 Nov 2021 01:48:56 -0800 (PST)
+Received: by mail-pl1-x62a.google.com with SMTP id u17so19904520plg.9
+        for <linux-kernel@vger.kernel.org>; Tue, 09 Nov 2021 01:48:56 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=sifive.com; s=google;
+        h=from:to:subject:date:message-id:in-reply-to:references:mime-version
+         :content-transfer-encoding;
+        bh=Vub601s5coaRpp9kU3Eneee7Bzk9CoXcDFYUdh/yUb4=;
+        b=JyUcyciFRzzYYp9uPqtgoYeeBxrzb9Sm45qw/bnFYDLaasWSvfZlOT1aItjSuT910p
+         IMH9JngmZ6R+RqXECaSEcKJu6kTP05L83/QZnGelZKslpynpOAgZm9GnJMPWlu2Bl/tz
+         Hs0FBDFGFkB8ztgQk9inlX67oZOmA+zCCEgolvmOlYtvcymgqhJrUX6dhTwU8YI5DIwW
+         P8Ry+AIQWEILx26BZDfFmCJa0r2KhHUQkBqFNVanep/JhPoTf2AoZs7FYOLrGGiKMFs9
+         1WIFiga7CLlCwWk2Bk+WeO8qup7mxPP0OSqyifvrUZQpy95E39kWmi9P+F8W5OGsf985
+         ORHQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:from:to:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=Vub601s5coaRpp9kU3Eneee7Bzk9CoXcDFYUdh/yUb4=;
+        b=H7kVmC2iO24Q/V0/ZanSwJ3nq32AaAXQxIj7CzN9pluz3niQEy3nRpoL7SxKk6CoAH
+         eF9BzGvLT0nMYXwpQ2uhxcAkeU9kEDug4LUiRfAG6uulqdgNTnoQOojj8ie7RebER4NR
+         n8G2bGq1alRScLlcu0vPp/GYfvRmrWCfU5PCEBPSID061OAuEawQ61Lljl4QdUSWJz9l
+         n0y57Wsuaik8c87SryV2RcKUmwNM9lAiOsbKE7FtmwkdEE9SyuyveqmKfjJeMnL1jBHi
+         p9q4enJKM0ptU7/Y1tNxqTgbyx4VrnM3RuReWFUrvx4UIoExwR0JRINlCpYyfO8IrE17
+         63bQ==
+X-Gm-Message-State: AOAM533RCJ/vyykbM3pgbK2anIxwynb8sX3xKVaU59iHVmDWnKny2fV2
+        kD2m7M1AZy+kOacuE/ES/Nhnj/ABsjW5rw==
+X-Google-Smtp-Source: ABdhPJzEcSgen4cPqTPPxdd8RjGLhjnXGs+ZgWDTCKGrccekjAhdSY+7/5ukjNzOST1jTpUdezj9tA==
+X-Received: by 2002:a17:902:ec8e:b0:141:da55:6158 with SMTP id x14-20020a170902ec8e00b00141da556158mr6011841plg.7.1636451336104;
+        Tue, 09 Nov 2021 01:48:56 -0800 (PST)
+Received: from hsinchu16.internal.sifive.com (59-124-168-89.hinet-ip.hinet.net. [59.124.168.89])
+        by smtp.gmail.com with ESMTPSA id cv1sm1940511pjb.48.2021.11.09.01.48.54
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 09 Nov 2021 01:48:55 -0800 (PST)
+From:   Greentime Hu <greentime.hu@sifive.com>
+To:     palmer@dabbelt.com, paul.walmsley@sifive.com,
+        linux-riscv@lists.infradead.org, linux-kernel@vger.kernel.org,
+        aou@eecs.berkeley.edu
+Subject: [PATCH v9 16/17] riscv: Fix an illegal instruction exception when accessing vlenb without enable vector first
+Date:   Tue,  9 Nov 2021 17:48:28 +0800
+Message-Id: <3c0297d8335e4cac54a4397c880092c1c983e04e.1636362169.git.greentime.hu@sifive.com>
+X-Mailer: git-send-email 2.31.1
+In-Reply-To: <cover.1636362169.git.greentime.hu@sifive.com>
+References: <cover.1636362169.git.greentime.hu@sifive.com>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+Precedence: bulk
+List-ID: <linux-kernel.vger.kernel.org>
+X-Mailing-List: linux-kernel@vger.kernel.org
+
+It triggered an illegal instruction exception when accessing vlenb CSR
+without enable vector first. To fix this issue, we should enable vector
+before using it and disable vector after using it.
+
+Co-developed-by: Vincent Chen <vincent.chen@sifive.com>
+Signed-off-by: Vincent Chen <vincent.chen@sifive.com>
+Signed-off-by: Greentime Hu <greentime.hu@sifive.com>
+---
+ arch/riscv/include/asm/vector.h        | 2 ++
+ arch/riscv/kernel/cpufeature.c         | 2 ++
+ arch/riscv/kernel/kernel_mode_vector.c | 6 ++++--
+ 3 files changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/arch/riscv/include/asm/vector.h b/arch/riscv/include/asm/vector.h
+index 5d7f14453f68..ca063c8f47f2 100644
+--- a/arch/riscv/include/asm/vector.h
++++ b/arch/riscv/include/asm/vector.h
+@@ -8,6 +8,8 @@
+ 
+ #include <linux/types.h>
+ 
++void rvv_enable(void);
++void rvv_disable(void);
+ void kernel_rvv_begin(void);
+ void kernel_rvv_end(void);
+ 
+diff --git a/arch/riscv/kernel/cpufeature.c b/arch/riscv/kernel/cpufeature.c
+index 8e7557980faf..0139ec20adce 100644
+--- a/arch/riscv/kernel/cpufeature.c
++++ b/arch/riscv/kernel/cpufeature.c
+@@ -159,7 +159,9 @@ void __init riscv_fill_hwcap(void)
+ 	if (elf_hwcap & COMPAT_HWCAP_ISA_V) {
+ 		static_branch_enable(&cpu_hwcap_vector);
+ 		/* There are 32 vector registers with vlenb length. */
++		rvv_enable();
+ 		riscv_vsize = csr_read(CSR_VLENB) * 32;
++		rvv_disable();
+ 	}
+ #endif
+ }
+diff --git a/arch/riscv/kernel/kernel_mode_vector.c b/arch/riscv/kernel/kernel_mode_vector.c
+index 8d2e53ea25c1..1ecb6ec5c56d 100644
+--- a/arch/riscv/kernel/kernel_mode_vector.c
++++ b/arch/riscv/kernel/kernel_mode_vector.c
+@@ -71,15 +71,17 @@ static void put_cpu_vector_context(void)
+ 	preempt_enable();
+ }
+ 
+-static void rvv_enable(void)
++void rvv_enable(void)
+ {
+ 	csr_set(CSR_STATUS, SR_VS);
+ }
++EXPORT_SYMBOL(rvv_enable);
+ 
+-static void rvv_disable(void)
++void rvv_disable(void)
+ {
+ 	csr_clear(CSR_STATUS, SR_VS);
+ }
++EXPORT_SYMBOL(rvv_disable);
+ 
+ /*
+  * kernel_rvv_begin(): obtain the CPU vector registers for use by the calling
+-- 
+2.31.1
+
+
