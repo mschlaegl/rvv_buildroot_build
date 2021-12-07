@@ -66,6 +66,12 @@ build_buildroot()
 	echo " -- Build"
 
 	popd > /dev/null
+
+	echo " ++ Link output"
+	rm -rf output
+	ln -s buildroot/output
+	echo " -- Link output"
+
 	return 0
 }
 
